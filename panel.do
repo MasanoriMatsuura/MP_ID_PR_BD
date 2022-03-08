@@ -29,6 +29,7 @@ global BIHS18Male = "C:\Users\user\Documents\research\saiful\mobile_phone\BIHS\B
 global BIHS15 = "C:\Users\user\Documents\research\saiful\mobile_phone\BIHS\BIHS2015"
 global BIHS12 = "C:\Users\user\Documents\research\saiful\mobile_phone\BIHS\BIHS2012"
 global table = "C:\Users\user\Documents\research\saiful\mobile_phone\table"
+global graph = "C:\Users\user\Documents\research\saiful\mobile_phone\graph"
 cd "C:\Users\user\Documents\research\saiful\mobile_phone\BIHS\Do"
 
 /*creating a panel dataset*/
@@ -124,3 +125,7 @@ eststo clear
 sort year
 by year: eststo: quietly estpost correlate mobile inc_div offfarm ttinc pcti
 esttab  using $table\corr_inc_mobile.rtf, label replace addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19)
+
+*mobile phone ownership overtime
+graph bar mobile, over(year) ytitle("Mobile phone ownership") title("mobile phone ownership from 2011 to 2019") note("Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19") scheme(s1mono)
+graph export $graph/phone_overtime.jpg, replace
