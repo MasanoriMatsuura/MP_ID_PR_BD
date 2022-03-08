@@ -51,6 +51,7 @@ label var frmwage "Farm wage"
 label var nonself "Non-farm self"
 label var nonwage "Non-farm wage and salary"
 label var nonearn "Non-earned"
+label var ttinc "Total household income"
 label var sdst "20-year summer temperature (SD)"
 label var sdrt "20-year rainy season temperature (SD)"
 label var sdat "20-year autumn temperature (SD)"
@@ -66,12 +67,10 @@ replace shnc=. if crp_div==1
 replace shni=. if inc_div==1
 
 *create peer effect variables
-
 recode crp_div (0=0)(nonm=1), gen(crp_div_i)
 recode inc_div (0=0)(nonm=1), gen(inc_div_i)
 recode shnc (0=0)(nonm=1), gen(shnc_i)
 recode shni (0=0)(nonm=1), gen(shni_i)
-
 sort uncode year
 by uncode year: egen adaptation_nc=sum(crp_div_i) 
 by uncode year: egen total_nc=count(a01)
@@ -88,10 +87,8 @@ sort uncode year
 by uncode year: egen adaptation_nshi=sum(shni_i)
 by uncode year: egen total_nshi=count(a01)
 gen preff_shi=(adaptation_nshi-shni_i)/(total_nshi) //creating peer effect shannon income
-
 label var preff_crp_div "share of households adopting crop diversification within the union"
 label var preff_incdiv "share of households adopting income diversification within the union"
-
 
 *create log hdds and expenditure
 gen lnhdds=log(hdds)
@@ -105,6 +102,14 @@ label var shni "Income diversification (Shannon)"
 *mobile ownership
 label var mobile "Mobile phone (dummy)"
 
+*off-farm emlpoyment (dummy)
+recode nonwage (0=0 "no")(nonm=1 "yes"), gen("offfarm")
+label var offfarm "Off-farm employment (dummy)"
+
+*per capita total income
+gen pcti=ttinc/hh_size
+label var pcti "Per capita total income"
+
 save panel.dta, replace
 
 export delimited using panel.csv, replace //output as csv
@@ -112,10 +117,10 @@ export delimited using panel.csv, replace //output as csv
 *correlation among mobile phone and poverty line
 eststo clear
 sort year
-by year: eststo: quietly estpost correlate  mobile pcexp_da p190hcgcpi p190hcfcpi p320hcfcpi deppov190gcpi deppov190fcpi deppov320gcpi deppov320fcpi hc_mpi mpiscore
+by year: eststo: quietly estpost correlate  mobile hdds pcexp_da p190hcgcpi p190hcfcpi p320hcfcpi deppov190gcpi deppov190fcpi deppov320gcpi deppov320fcpi hc_mpi mpiscore
 esttab  using $table\corr_mobile_hw.rtf, label replace addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19)
 
 eststo clear
 sort year
-by year: eststo: quietly estpost correlate mobile inc_div
+by year: eststo: quietly estpost correlate mobile inc_div offfarm ttinc pcti
 esttab  using $table\corr_inc_mobile.rtf, label replace addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19)
