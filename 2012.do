@@ -22,7 +22,9 @@ save 2012, replace
 use $BIHS12\006_mod_d1_male, clear //household ownership
 keep if d1_02==24
 recode d1_03 (1=1 "yes")(2=0 "no"), gen(mobile)
-keep a01 mobile
+rename d1_04 mobile_q
+label var mobile_q "Mobile phone ownership (quantity)"
+keep a01 mobile mobile_q
 save mobile12, replace
 
 **poverty indicators
@@ -44,9 +46,6 @@ label var schll_hh "Schooling year of HH"
 recode gender_hh (1=1 "Man")(2=0 "Woman"), gen(Male)
 label var Male "Male(=1)"
 save sciec12.dta, replace
-
-** Woman Empowerment in Agriculture Index
-
 
 
 ** keep age gender education occupation of HH
@@ -218,6 +217,22 @@ label var agri "Agricultural office (minute)"
 merge 1:1 a01 using facility12, nogen
 merge 1:1 a01 using `town', nogen
 save facility12, replace
+use $BIHS12\037_mod_s_male, clear
+keep a01 s_01 s_06
+keep if s_01==6
+drop s_01
+rename s_06 bazaar
+label var bazaar "Periodic bazaar access (minute)"
+merge 1:1 a01 using facility12, nogen
+save facility12, replace
+use $BIHS12\037_mod_s_male, clear
+keep a01 s_01 s_06
+keep if s_01==5
+drop s_01
+rename s_06 shop
+label var shop "Local shop access (minute)"
+merge 1:1 a01 using facility12, nogen
+save facility12, replace
 
 
 **Agricultural extension
@@ -282,44 +297,49 @@ label var fshinc "fishery income"
 duplicates drop a01, force
 save fsh12.dta, replace
 
-**keep non-farm wage
+**keep Non-farm self employment
 use $BIHS12\005_mod_c_male.dta, clear
-keep a01 c14
-replace c14=0 if c14==.
-bysort a01: egen nnfrminc=sum(c14)
-keep a01 nnfrminc
-label var nnfrminc "non-farm wage"
+keep a01 c05 c09 c14
+keep if c09 == 3 //keep self employed
+drop if c09==1 // drop farm wage
+bysort a01: egen offsel=sum(c14)
+gen offself=12*offsel
+keep a01 offself
+label var offself "Non-farm self employment"
 duplicates drop a01, force
 save nnfrminc12.dta, replace
 
-**keep farm wage
+**Non-farm employment 
 use $BIHS12\005_mod_c_male.dta, clear
-keep if c05== 1 
+keep a01 c05 c09 c14
+keep if c09 != 3 //keep salary and wage
+drop if c05== 1 //drop farm wage
+gen yc14=12*c14
+bysort a01: egen offrminc=sum(yc14)
+label var offrminc "Non-farm wage and salary"
+keep a01 offrminc
+duplicates drop a01, force
+save offfrm12.dta, replace
+
+**farm wage
+use $BIHS12\005_mod_c_male.dta, clear
+keep if c05== 1
 keep a01 c14
 replace c14=0 if c14==.
-bysort a01: egen frmwage=sum(c14) 
+bysort a01: egen frmwag=sum(c14)
+gen frmwage=frmwag*12
 keep a01 frmwage
-label var frmwage "farm wage"
+label var frmwage "Farm wage"
 duplicates drop a01, force
 save frmwage12.dta, replace
 
-/*Non-agricultural enterprise*/
+*Non-agricultural enterprise
 use $BIHS12\030_mod_n_male.dta, clear
 bysort a01: egen nnagent=sum(n05)
 label var nnagent "non-agricultural enterprise"
 keep a01 nnagent
 duplicates drop a01, force
 save nnagent12.dta, replace
-
-**off-farm income
-use $BIHS12\005_mod_c_male.dta, clear
-keep a01 c14
-gen yc14=12*c14
-bysort a01: egen offrminc=sum(yc14)
-label var offrminc "Off-farm income "
-keep a01 offrminc
-duplicates drop a01, force
-save offfrm12.dta, replace
 
 /*food consumption*/
 use $BIHS12/031_mod_o1_female, clear
@@ -409,6 +429,7 @@ merge 1:1 a01 using fsh12.dta, nogen
 merge 1:1 a01 using nnagent12.dta, nogen
 merge 1:1 a01 using rem12.dta, nogen
 merge 1:1 a01 using frmwage12.dta, nogen
+merge 1:1 a01 using nnfrminc12.dta, nogen
 drop dstnc_sll_ trnsctn lvstck fshdiv v2_06
 replace crp_vl=0 if crp_vl==.
 replace offrminc=0 if offrminc==.
@@ -418,10 +439,11 @@ replace ttllvstck=0 if ttllvstck==.
 replace remi=0 if remi==.
 replace nnagent=0 if nnagent==.
 replace frmwage=0 if frmwage==.
-gen ttinc= crp_vl+nnearn+trsfr+ttllvstck+offrminc+fshinc+nnagent+remi+frmwage //total income
+replace offself=0 if offself==.
+gen ttinc= crp_vl+nnearn+trsfr+ttllvstck+offrminc+fshinc+nnagent+remi+frmwage+offself //total income
 gen aginc=ttllvstck+crp_vl+fshinc
-gen nonself=nnagent //non-farm self
-gen nonwage=offrminc //non-farm wage
+gen nonself=offself+nnagent //off-farm self
+gen nonwage=offrminc //off-farm wage
 gen nonearn=remi+trsfr+nnearn //non-earned 
 gen i1=(aginc/ttinc)^2
 gen i2=(frmwage/ttinc)^2
