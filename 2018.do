@@ -22,7 +22,9 @@ save 2018, replace
 use $BIHS18Male\015_bihs_r3_male_mod_d1, clear //household ownership
 keep if d1_02==24
 recode d1_03 (1=1 "yes")(2=0 "no"), gen(mobile)
-keep a01 mobile
+rename d1_04 mobile_q
+label var mobile_q "Mobile phone ownership (quantity)"
+keep a01 mobile mobile_q
 save mobile18, replace
 
 **poverty indicators
@@ -200,6 +202,22 @@ label var agri "Agricultural office (minute)"
 merge 1:1 a01 using facility18, nogen
 merge 1:1 a01 using `town', nogen
 save facility18, replace
+use $BIHS18Male\066_bihs_r3_male_mod_s, clear
+keep a01 s_01 s_06
+keep if s_01==6
+drop s_01
+rename s_06 bazaar
+label var bazaar "Periodic bazaar access (minute)"
+merge 1:1 a01 using facility18, nogen
+save facility18, replace
+use $BIHS18Male\066_bihs_r3_male_mod_s, clear
+keep a01 s_01 s_06
+keep if s_01==5
+drop s_01
+rename s_06 shop
+label var shop "Local shop access (minute)"
+merge 1:1 a01 using facility18, nogen
+save facility18, replace
 
 **Agricultural extension
 use $BIHS18Male\038_bihs_r3_male_mod_j1, clear 
@@ -255,7 +273,7 @@ keep a01 livdiv
 duplicates drop a01, force
 save livdiv18.dta, replace
 
-/*fishery income*/
+*fishery income
 use $BIHS18Male\052_bihs_r3_male_mod_l2.dta, clear
 bysort a01:egen fshinc=sum(l2_12)
 bysort a01:egen fshdiv=count(l2_01)
@@ -265,66 +283,48 @@ label var fshinc "fishery income"
 duplicates drop a01, force
 save fsh18.dta, replace
 
-**keep non-farm wage
+**keep Non-farm self employment
 use $BIHS18Male\012_bihs_r3_male_mod_c.dta, clear
-keep a01 c14
-replace c14=0 if c14==.
-bysort a01: egen nnfrminc=sum(c14)
-keep a01 nnfrminc
-label var nnfrminc "non-farm wage"
+keep a01 c05 c09 c14
+keep if c09 == 3 //keep self employed
+bysort a01: egen offsel=sum(c14)
+gen offself=12*offsel
+keep a01 offself
+label var offself "Non-farm self employment"
 duplicates drop a01, force
 save nnfrminc18.dta, replace
 
+**Non-farm employment 
+use $BIHS18Male\012_bihs_r3_male_mod_c.dta, clear
+keep a01 c05 c09 c14
+keep if c09 != 3 //keep salary and wage
+drop if c05== 1 //drop farm wage
+gen yc14=12*c14
+bysort a01: egen offrminc=sum(yc14)
+label var offrminc "Non-farm wage and salary"
+keep a01 offrminc
+duplicates drop a01, force
+save offfrm18.dta, replace
+
 **farm wage
 use $BIHS18Male\012_bihs_r3_male_mod_c.dta, clear
-keep if c05== 1 
+keep if c05== 1
 keep a01 c14
 replace c14=0 if c14==.
-bysort a01: egen frmwage=sum(c14) 
+bysort a01: egen frmwag=sum(c14) 
+gen frmwage =12*frmwag
 keep a01 frmwage
-label var frmwage "farm wage"
+label var frmwage "Farm wage"
 duplicates drop a01, force
 save frmwage18.dta, replace
 
-
-/*Non-agricultural enterprise*/
+*Non-agricultural enterprise
 use $BIHS18Male\060_bihs_r3_male_mod_n, clear
 bysort a01: egen nnagent=sum(n05)
 label var nnagent "non-agricultural enterprise"
 keep a01 nnagent
 duplicates drop a01, force
 save nnagent18.dta, replace
-
-**off-farm but related to agriculture
-use $BIHS18Male\013_bihs_r3_male_mod_c1, clear
-keep a01 c1_5 c1_9 c1_13
-replace c1_5=0 if c1_5==.
-replace c1_9=0 if c1_9==.
-replace c1_13=0 if c1_13==.
-gen nnfrm=c1_5+c1_9+c1_13
-bysort a01: egen offrmagr=sum(nnfrm)
-label var offrmagr "Off-farm income related with agriculture"
-keep a01 offrmagr
-duplicates drop a01, force
-save offfrmagr18.dta, replace
-
-**off-farm income*
-use $BIHS18Male\012_bihs_r3_male_mod_c.dta, clear
-keep a01 c14
-gen yc14=12*c14
-bysort a01: egen offrm=sum(yc14)
-label var offrm "Off-farm income "
-keep a01 offrm
-duplicates drop a01, force
-save offfrm18.dta, replace
-merge 1:1 a01 using offfrmagr18, nogen
-gen offrminc=offrm+offrmagr
-label var offrminc "Off-farm income"
-keep a01 offrminc
-save offfrm18.dta, replace
-
-/*Non-agricultural enterprise
-use $BIHS18Male\042_r2_mod_o1_female.dta, clear*/
 
 *food consumption
 use $BIHS18Female\096_bihs_r3_female_mod_o1.dta, clear
@@ -452,7 +452,7 @@ gen shn4=p4*lnp4
 gen shn5=p5*lnp5
 egen shnni = rowtotal(shn1 shn2 shn3 shn4 shn5)
 gen shni=-1*(shnni) //shannon
-keep a01 inc_div shni aginc frmwage nonself nonwage nonearn //ttinc ttinc crp_vl nnearn trsfr ttllvstck offrminc fshinc nnagent
+keep a01 inc_div shni aginc frmwage nonself nonwage nonearn ttinc // crp_vl nnearn trsfr ttllvstck offrminc fshinc nnagent
 save incdiv18.dta, replace
 
 **climate variables 
@@ -513,7 +513,6 @@ save climate18, replace
 
 **merge all 2018 dataset
 use 2018.dta,clear
-
 merge m:1 dcode using climate18, nogen
 duplicates drop a01, force
 merge 1:1 a01 using sciec18, nogen
