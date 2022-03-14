@@ -20,7 +20,9 @@ save 2015, replace
 use $BIHS15\010_r2_mod_d1_male, clear //household ownership
 keep if d1_02==24
 recode d1_03 (1=1 "yes")(2=0 "no"), gen(mobile)
-keep a01 mobile
+rename d1_04 mobile_q
+label var mobile_q "Mobile phone ownership (quantity)"
+keep a01 mobile mobile_q
 save mobile15, replace
 
 **poverty indicators

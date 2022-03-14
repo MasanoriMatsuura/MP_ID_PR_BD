@@ -413,6 +413,7 @@ merge 1:1 a01 using fsh18.dta, nogen
 merge 1:1 a01 using nnagent18.dta, nogen
 merge 1:1 a01 using rem18.dta, nogen
 merge 1:1 a01 using frmwage18.dta, nogen
+merge 1:1 a01 using nnfrminc18.dta, nogen
 drop dstnc_sll_ trnsctn lvstck fshdiv
 replace crp_vl=0 if crp_vl==.
 replace offrminc=0 if offrminc==.
@@ -424,7 +425,7 @@ replace nnagent=0 if nnagent==.
 replace frmwage=0 if frmwage==.
 gen ttinc= crp_vl+nnearn+trsfr+ttllvstck+offrminc+fshinc+nnagent+remi+frmwage //total income
 gen aginc=ttllvstck+crp_vl+fshinc
-gen nonself=nnagent //non-farm self
+gen nonself=offself //non-farm self
 gen nonwage=offrminc //non-farm wage
 gen nonearn=remi+trsfr+nnearn //non-earned 
 gen i1=(aginc/ttinc)^2

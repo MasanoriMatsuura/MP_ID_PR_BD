@@ -442,7 +442,7 @@ replace frmwage=0 if frmwage==.
 replace offself=0 if offself==.
 gen ttinc= crp_vl+nnearn+trsfr+ttllvstck+offrminc+fshinc+nnagent+remi+frmwage+offself //total income
 gen aginc=ttllvstck+crp_vl+fshinc
-gen nonself=offself+nnagent //off-farm self
+gen nonself=offself //off-farm self
 gen nonwage=offrminc //off-farm wage
 gen nonearn=remi+trsfr+nnearn //non-earned 
 gen i1=(aginc/ttinc)^2
