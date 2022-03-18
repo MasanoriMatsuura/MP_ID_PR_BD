@@ -164,40 +164,43 @@ reghdfe nonfarmself bazaar srshock rrshock arshock wrshock  stshock rtshock atsh
 **second stage the impact of mobile phone on off-farm employment, poverty index
 xtprobit hc_mpi mobile_q bazaar srshock rrshock arshock wrshock ln_sds ln_sdr ln_sda ln_sdw stshock rtshock atshock wtshock ln_sdst ln_sdrt ln_sdat ln_sdwt Male age_hh hh_size schll_hh lvstck lnfrm road extension market irrigation year2012 year2015 , vce(robust)
 
-** 2SLS
-ivreghdfe ln_ttlinc srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),a(a01) vce(robust) 
+** 2SLS IV probit
+reghdfe ln_ttlinc srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village), a(01) vce(r)
 
-ivreghdfe offfarm srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),a(a01) vce(robust)
+ivprobit offfarm srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),vce(r)
 
-ivreghdfe ln_pctinc srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),a(a01) vce(robust)
+ivprobit ln_pctinc srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),vce(r)
 
-ivreghdfe mpiscore srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),a(a01) vce(robust)
 
-ivreghdfe hc_mpi srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),a(a01) vce(robust)
+ivprobit mpiscore srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),vce(r)
+
+ivprobit hc_mpi srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),vce(r)
+
+ivprobit p190hcgcpi srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 (mobile=mobile_village),vce(r)
 
 
 ** endogenous switching regression
-movestay hc_mpi srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, select(mobile=mobile_village) cluster(Village)
+movestay hc_mpi srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, select(mobile=mobile_village) vce(robust)
 
 **Validity of IV
 eststo clear
 
-eststo: reghdfe mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, a(a01) vce(robust)
+eststo: xtprobit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, vce(robust)
 quietly estadd local fe Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe offfarm mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, a(a01) vce(robust)
+eststo: xtprobit offfarm mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015, vce(r)
 quietly estadd local fe Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe mpiscore mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,a(a01) vce(robust)
+eststo: reghdfe mpiscore mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,a(a01) vce(r)
 quietly estadd local fe Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe ln_ttlinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,a(a01) vce(robust)
+eststo: reghdfe ln_ttlinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,a(a01) vce(r)
 quietly estadd local fe Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
@@ -206,6 +209,10 @@ eststo: reghdfe ln_pctinc mobile_village srshock rrshock arshock wrshock  stshoc
 quietly estadd local fe Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
+
+xtprobit hc_mpi mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 , vce(robust)
+
+xtprobit p190hcgcpi mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015 , vce(robust)
 
 esttab  using $table\falsification_iv.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1) and (2): Linear probability model. (3), (4), and (5): OLS fixed effect model.) keep(mobile_village) s(fe year control N, label("Individual FE" "Year FE" "Control variables" "Observations")) mtitles("Adoption of mobile phone (1/0), LPM" "Off-farm employment (1/0), LPM" "MPI score, FE" "Total household income (log), FE" "Per capita total income (log)")
 
