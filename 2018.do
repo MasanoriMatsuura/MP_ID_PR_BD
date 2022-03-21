@@ -21,11 +21,19 @@ save 2018, replace
 **mobile phone ownership
 use $BIHS18Male\015_bihs_r3_male_mod_d1, clear //household ownership
 keep if d1_02==24
-recode d1_03 (1=1 "yes")(2=0 "no"), gen(mobile)
+recode d1_03 (1=1 "yes")(nonm=0 "no"), gen(mobile)
 rename d1_04 mobile_q
 label var mobile_q "Mobile phone ownership (quantity)"
 keep a01 mobile mobile_q
 save mobile18, replace
+
+** migrant status
+use $BIHS18Male\072_bihs_r3_male_mod_v1, clear //if any members are migrants
+recode v1_01 (1=1 "Yes")(2=0 "No"), gen(migrant)
+keep a01 migrant
+label var migrant "Member migration (1/0)"
+duplicates drop a01, force
+save migrant18, replace
 
 **poverty indicators
 use $BIHS18Male\hhexpenditure_R3, clear // poverty status and depth (gap)
@@ -540,6 +548,7 @@ merge 1:1 a01 using facility18, nogen
 merge 1:1 a01 using extension18, nogen
 merge 1:1 a01 using mobile18, nogen
 merge 1:1 a01 using poverty18, nogen
+merge 1:1 a01 using migrant18, nogen
 label var farmsize "Farm Size(decimal)"
 label var ln_farm "Farm size(log)"
 //gen lnoff=log(offrmagr)
