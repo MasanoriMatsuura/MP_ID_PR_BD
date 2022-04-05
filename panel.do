@@ -300,39 +300,37 @@ ttest irrigation , by(mobile)
 ttest extension, by(mobile)
 
 ** Step 3: PSM Estimation -- psmatch2
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(offfarm) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(offfarm) logit n(1) noreplace com caliper(0.05) ate
 
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(p320hcgcpi) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(p320hcgcpi) logit n(1) noreplace com caliper(0.05) ate
 
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(deppov320gcpi) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(deppov320gcpi) logit n(1) noreplace com caliper(0.05) ate
 
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(mpiscore) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(mpiscore) logit n(1) noreplace com caliper(0.05) ate
 
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(ttinc) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(ttinc) logit n(1) noreplace com caliper(0.05) ate
 
-psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension,out(pcti) logit n(1) noreplace com caliper(0.01)
+bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension year2012 year2015,out(pcti) logit n(1) noreplace com caliper(0.05) ate
 
-pstest mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension, both 
 
-pstest _pscore, density both
+pstest _pscore, density 
 
 *PSM DID
-gen time = (year > 2012) &!missing(year)
-gen treated = (mobile == 1) & !missing(mobile)
-gen did = time*treated
+recode year (2015=1 "After")(2018=1 "After")(nonm=0 "Before"), gen(time)
+gen did = time*mobile
 
-probit offfarm time treated did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh lvstck lnfrm bazaar road irrigation extension if _support==1 & year < 2018 , vce(robust) 
-
-
-probit p320hcgcpi time treated did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm bazaar road irrigation extension if _support==1 & year < 2018 , vce(robust)
+probit offfarm time mobile did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh lvstck lnfrm bazaar road irrigation extension if _n1!=. & year < 2018 , vce(robust) 
 
 
-reghdfe deppov320gcpi time treated did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _support==1 & year < 2018 ,  vce(r)
+probit p320hcgcpi time mobile did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm bazaar road irrigation extension if _n1!=. & year < 2018 , vce(robust)
 
 
-reghdfe mpiscore time treated did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _support==1 & year < 2018 , vce(r) 
-
-reghdfe ln_ttlinc time treated did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _support==1 & year < 2018 , vce(r)
+reghdfe deppov320gcpi time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 ,  vce(r)
 
 
-reghdfe ln_pctinc time treated did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _support==1 & year < 2018 , vce(r)
+reghdfe mpiscore time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r) 
+
+reghdfe ln_ttlinc time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r)
+
+
+reghdfe ln_pctinc time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh lvstck lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r)
