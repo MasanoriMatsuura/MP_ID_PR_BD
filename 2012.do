@@ -70,6 +70,16 @@ recode gender_hh (1=1 "Man")(2=0 "Woman"), gen(Male)
 label var Male "Male(=1)"
 save sciec12.dta, replace
 
+**Asset index
+use $BIHS12\006_mod_d1_male.dta, clear  
+tabulate d1_02, gen(a)
+pca a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45
+predict assetindex
+sort a01
+by a01: egen asset=sum(d1_03*assetindex)
+keep a01 asset
+duplicates drop a01, force
+save asset12.dta, replace
 
 **keep agronomic variables
 use $BIHS12\010_mod_g_male, clear
@@ -563,6 +573,7 @@ merge 1:1 a01 using extension12, nogen
 merge 1:1 a01 using mobile12, nogen
 merge 1:1 a01 using poverty12, nogen
 merge 1:1 a01 using migrant12, nogen
+merge 1:1 a01 using asset12, nogen
 label var farmsize "Farm Size(decimal)"
 label var ln_farm "Farm size(log)"
 //gen lnoff=log(offrmagr)
