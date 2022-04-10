@@ -1,4 +1,4 @@
-/*create 2015 dataset for regression*/
+/*create 2015 dataset for regression: mobile phone*/
 /*Author: Masanori Matsuura*/
 clear all
 set more off
@@ -39,6 +39,7 @@ merge 1:1 a01 using $BIHS15\mpi_R2, nogen //multidimentional poverty index
 keep a01 pcexp_da p190hcgcpi p190hcfcpi p320hcgcpi p320hcfcpi pov190gapgcpi deppov190gcpi pov190gapfcpi deppov190fcpi pov320gapgcpi pov320gapfcpi deppov320fcpi deppov320gcpi hc_mpi mpiscore
 save poverty15.dta, replace
 
+
 ** keep age gender education occupation of HH
 use $BIHS15\003_r2_male_mod_b1.dta, clear
 bysort a01: egen hh_size=count(a01)
@@ -52,6 +53,17 @@ label var schll_hh "Schooling year of HH"
 recode gender_hh (1=1 "Man")(2=0 "Woman"), gen(Male)
 label var Male "Male(=1)"
 save sciec15.dta, replace
+
+**Asset index
+use $BIHS15\010_r2_mod_d1_male, clear  
+tabulate d1_02, gen(a)
+pca a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45
+predict assetindex
+sort a01
+by a01: egen asset=sum(d1_03*assetindex)
+keep a01 asset
+duplicates drop a01, force
+save asset15.dta, replace
 
 **keep agronomic variables
 use $BIHS15\014_r2_mod_g_male, clear
@@ -138,15 +150,6 @@ label var dstnc_sll_ "distance to selling place"
 label var trnsctn "transaction time"
 save crpincm15.dta, replace
 
-/*use $BIHS15\039_r2_mod_m1_male, clear //crop income diversification 
-keep a01 m1_10
-bysort a01: egen ttl_frminc=sum(m1_10) 
-label var ttl_frminc "total farm income"
-gen es=(m1_10/ttl_frminc)^2
-label var es "enterprise share (farm income)"
-bysort a01: egen es1=sum(es)
-drop if m1_10==.
-hist es1 */
 
 **market access 
 use $BIHS15\039_r2_mod_m1_male, clear //Marketing of Paddy, Rice, Banana, Mango, and Potato
@@ -555,6 +558,7 @@ merge 1:1 a01 using extension15, nogen
 merge 1:1 a01 using mobile15, nogen
 merge 1:1 a01 using poverty15, nogen
 merge 1:1 a01 using migrant15, nogen
+merge 1:1 a01 using asset15, nogen
 label var farmsize "Farm Size(decimal)"
 label var ln_farm "Farm size(log)"
 gen year=2015
