@@ -29,8 +29,8 @@ ssc install psmatch2
 *Coefficient plot
 ssc install coefplot
 
-*DID
-ssc install didregress
+*gini decomposition
+ssc install descogini
 
 *set the pathes
 global climate = "C:\Users\user\Documents\Masterthesis\climatebang"
@@ -113,13 +113,15 @@ gen ln_pctinc=log(pcti+1)
 label var ln_ttlinc "Total household income (log)"
 label var ln_pctinc "Per capita total income (log)"
 
+gen povertyhead=p320hcgcpi/100
+label var povertyhead "Povery headcount (1/0)"
 save panel.dta, replace
 export delimited using panel.csv, replace //output as csv
 
 
 *Descriptive statistics
 sort year
-by year:  summarize offfarm p320hcgcpi deppov320gcpi mpiscore ttinc pcti mobile mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension if offfarm !=.
+by year:  summarize offfarm povertyhead deppov320gcpi mpiscore ttinc pcti mobile mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension if offfarm !=.
  
 
 *mobile phone ownership overtime
@@ -143,15 +145,21 @@ graph export $figure\income_dist.png, replace
 
 *the effect of mobile phone total income, off-farm income, poverty headcount, poverty gap, MPI score, MPI
 **probit model 1st stage, adoption of mobile phone
+*create instrument variables
 xtset a01 year
 eststo clear
 eststo: xtprobit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015,  vce(robust)
 predict xb
 gen residualm=mobile-xb
 drop xb 
+quietly estadd local FE No, replace
 quietly estadd local year Yes, replace
 
-esttab  using $table\1ststage.rtf, b(%4.3f) se replace label wide nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Estimated by random effect probit model) keep(mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension ) s(year N, label("Year dummy" "Observations")) mtitles("Determinants of mobile phone ownership") star(* 0.10 ** 0.05 *** 0.01)
+eststo: reghdfe mobile mobile_villag srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015, a(a01) vce(robust) 
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+
+esttab  using $table\1ststage.rtf, b(%4.3f) se replace label wide nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Estimated by random effect probit model) keep(mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension ) s(FE year N, label("Individual FE" "Year dummy" "Observations")) mtitles("Determinants of mobile phone ownership") star(* 0.10 ** 0.05 *** 0.01)
 
 **second stage the impact of mobile phone on off-farm employment, poverty, and income
 eststo clear
@@ -160,8 +168,18 @@ quietly estadd local FE No, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: xtprobit p320hcgcpi mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
+eststo: reghdfe offfarm mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, absorb(a01) vce(robust)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: xtprobit povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
 quietly estadd local FE No, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+ 
+eststo: reghdfe povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, absorb(a01) vce(robust)
+quietly estadd local FE Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
@@ -186,14 +204,15 @@ quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
 label var residualm "Residual-mobile"
-esttab  using $table\2ndstage.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1) and (2): Estimated by Random-effect probit model. (3), (4), (5), and (6): Estimated by OLS Fixed effect.) keep(mobile residualm) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment (1/0)" "Headcount poverty (1/0)" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
+esttab  using $table\2ndstage.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1) and (3): Estimated by RE probit model. (2) and (4): Estimated by FE LPM, (5), (6), (7) and (8): Estimated by OLS FE.) keep(mobile residualm) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Off-farm employment " "Poverty Headcount " "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
+
 
 * Coefficient plot
 eststo clear
-xtprobit offfarm mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
+reghdfe offfarm mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm,a(a01) vce(robust)
 estimates store A
 
-xtprobit p320hcgcpi mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
+reghdfe povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, a(a01)vce(robust)
 estimates store B
 
 
@@ -212,7 +231,7 @@ estimates store E
 reghdfe ln_pctinc mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
 estimates store F
 
-coefplot (A, label(Off-farm employment) msymbol(circle)) (B,label(Poverty gap) msymbol(diamond)) (C,label(Poverty depth) msymbol(triangle)) (D, label(MPI score) msymbol(square)) (E, label(Total household income (log)) msymbol(plus)) (F,label(per capita total income (log)) msymbol(X)), drop(srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm _cons) xline(0) scheme(s1mono) title("Impact of mobile phone ownership") note(Source: "BIHS2011/12, 2015, and 2018/19 calculated by author")
+coefplot (A, label(Off-farm employment) msymbol(circle)) (B,label(Poverty headcount(1/0)) msymbol(diamond)) (C,label(Poverty depth) msymbol(triangle)) (D, label(MPI score) msymbol(square)) (E, label(Total household income (log)) msymbol(plus)) (F,label(per capita total income (log)) msymbol(X)), drop(srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm _cons) xline(0) scheme(s1mono) title("Impact of mobile phone ownership") note(Source: "BIHS2011/12, 2015, and 2018/19 calculated by author")
 
 graph export $graph/impact_coef.jpg, replace
 
@@ -252,86 +271,42 @@ quietly estadd local control Yes, replace
 
 esttab  using $table\falsification_iv.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1), (2), and (3): Estimated by probit model. (4), (5), and (6): Estimated by OLS.) keep(mobile_village) s(year control N, label("Year dummy" "Control variables" "Observations")) mtitles("Mobile phone ownership (1/0)" "Off-farm employment (1/0)" "Headcount poverty (1/0)" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
 
+*Robustness check
+*PSM DID
+use panel, clear
+psmatch2 mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015, out(povertyhead) logit n(1) com caliper(0.05) ate
+
+bysort a01: egen matched=sum(_support)
+drop if year2012==1 & mobile==1
+bysort a01: egen treat=sum(mobile)
+
+label var year2015 "After"
+label var treat "Treated"
+
+
+pstest _pscore, density both title(Common support assumption for the propensity score) 
+graph export $graph/psm_density.jpg, replace
 
 
 *Inequality visualization, Lorenz Curve
-lorenz ttinc, over(mobile)
-lorenz graph, overlay aspectratio(1) xlabel(, grid) scheme(s1mono) title(Lorenz cureve of household total income) addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Calculated by authors)
+lorenz ttinc if _support==1, over(mobile)
+lorenz graph, overlay aspectratio(1) xlabel(, grid) scheme(s1mono) title(Household total income) label( "Non-ownership" "MP ownership" ) //addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Calculated by authors)
 graph export $graph/lorenz_totalincome.jpg, replace
 
-lorenz pcti, over(mobile)
-lorenz graph, overlay aspectratio(1) xlabel(, grid) scheme(s1mono) title(Lorenz cureve of per capita total income) addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Calculated by authors)
-graph export $graph/lorenz_pcti.jpg, replace 
-
-lorenz nonwage, over(mobile)
-lorenz graph, overlay aspectratio(1) xlabel(, grid) scheme(s1mono) title(Lorenz cureve of off-farm wage and employment) addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Calculated by authors)
+lorenz nonwage if _support==1 & nonwage>0, over(mobile)
+lorenz graph, overlay aspectratio(1) xlabel(, grid) scheme(s1mono) title(Off-farm employment wage and salary) label( "Non-ownership" "MP ownership" ) 
 graph export $graph/lorenz_nonwage.jpg, replace
 
-*Robustness check
-** PSM
-** Step 1: Test Differences in Outcomes in Pre-matching Data
-ttest offfarm , by(mobile)
-ttest p320hcgcpi, by(mobile)
-ttest deppov320gcpi, by(mobile)
-ttest mpiscore , by(mobile)
-ttest ttinc , by(mobile)
-ttest pcti, by(mobile)
 
-** Step 2: Test Differences in Covariates in Pre-matching Data
-ttest mobile_village , by(mobile)
-ttest srshock , by(mobile)
-ttest rrshock , by(mobile)
-ttest arshock , by(mobile)
-ttest wrshock  , by(mobile)
-ttest stshock , by(mobile)
-ttest rtshock , by(mobile)
-ttest atshock , by(mobile)
-ttest wtshock  , by(mobile)
-ttest Male , by(mobile)
-ttest age_hh , by(mobile)
-ttest hh_size , by(mobile)
-ttest schll_hh , by(mobile)
-ttest asset , by(mobile)
-ttest lnfrm , by(mobile)
-ttest road , by(mobile)
-ttest bazaar , by(mobile)
-ttest irrigation , by(mobile)
-ttest extension, by(mobile)
+graph combine pcti.gph ttinc.gph ofew.gph ,scheme(s1mono)
+graph export $graph/lorenz_ineq.jpg, replace
 
-** Step 3: PSM Estimation -- psmatch2
+
+*Gini
 eststo clear
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(offfarm) logit n(1) noreplace com caliper(0.05) ate
-
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(p320hcgcpi) logit n(1) noreplace com caliper(0.05) ate
-
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(deppov320gcpi) logit n(1) noreplace com caliper(0.05) ate
-
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(mpiscore) logit n(1) noreplace com caliper(0.05) ate
-
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(ttinc) logit n(1) noreplace com caliper(0.05) ate
-
-eststo: bootstrap r(ate),reps(100): psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015,out(pcti) logit n(1) noreplace com caliper(0.05) ate
-
-esttab  using $table\psm.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. ) star(* 0.10 ** 0.05 *** 0.01) mtitles ("Off-farm employment (1/0)" "Headcount poverty (1/0)" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")
-
-pstest _pscore, density 
-
-*PSM DID
-recode year (2015=1 "After")(2018=1 "After")(nonm=0 "Before"), gen(time)
-gen did = time*mobile
-
-probit offfarm time mobile did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension if _n1!=. & year < 2018 , vce(robust) 
+eststo: descogini ttinc aginc frmwage nonself nonwage nonearn if _support==1, d(3)
+eststo: descogini ttinc aginc frmwage nonself nonwage nonearn if _support==1 & mobile==1, d(3)
+eststo: descogini ttinc aginc frmwage nonself nonwage nonearn if _support==1 & mobile==0, d(3)
 
 
-probit p320hcgcpi time mobile did srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension if _n1!=. & year < 2018 , vce(robust)
-
-
-reghdfe deppov320gcpi time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 ,  vce(r)
-
-
-reghdfe mpiscore time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r) 
-
-reghdfe ln_ttlinc time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r)
-
-
-reghdfe ln_pctinc time mobile did srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension if _n1!=. & year < 2018 , vce(r)
+esttab  using $table\gini.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19.) 
