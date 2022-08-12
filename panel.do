@@ -1,4 +1,4 @@
-/*Mobile Phone and Household Welfare: Analysis*/
+ /*Mobile Phone and Household Welfare: Analysis*/
 
 /*Author: Masanori Matsuura*/
 clear all
@@ -113,8 +113,11 @@ gen ln_pctinc=log(pcti+1)
 label var ln_ttlinc "Total household income (log)"
 label var ln_pctinc "Per capita total income (log)"
 
-gen povertyhead=p320hcgcpi/100
+gen povertyhead=p190hcgcpi/100
 label var povertyhead "Povery headcount (1/0)"
+recode Male (1=0 "no")(0=1 "yes"), gen(female)
+label var female "Female household head"
+
 save panel.dta, replace
 export delimited using panel.csv, replace //output as csv
 
@@ -122,57 +125,59 @@ export delimited using panel.csv, replace //output as csv
 *Descriptive statistics
 bysort year a01: egen treat=sum(mobile)
 
-sort year treat
-by year treat:  summarize offfarm povertyhead deppov320gcpi mpiscore ttinc pcti mobile mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw Male age_hh hh_size schll_hh asset farmsize bazaar road if offfarm !=.
+sort year mobile
+by year mobile:  summarize offfarm povertyhead deppov190gcpi mpiscore ttinc pcti mobile mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw female age_hh hh_size schll_hh asset farmsize bazaar road if mobile !=.
 
-ttest offfarm if offfarm !=. & year==2012, by(treat)
-ttest povertyhead if offfarm !=. & year==2012, by(treat)
-ttest deppov320gcpi if offfarm !=. & year==2012, by(treat)
-ttest mpiscore if offfarm !=. & year==2012, by(treat)
-ttest ttinc if offfarm !=. & year==2012, by(treat)
-ttest pcti if offfarm !=. & year==2012, by(treat)
+by year:  summarize offfarm povertyhead deppov190gcpi mpiscore ttinc pcti mobile mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw female age_hh hh_size schll_hh asset farmsize bazaar road if mobile !=.
 
-ttest Male if offfarm !=. & year==2012, by(treat)
-ttest age_hh if offfarm !=. & year==2012, by(treat)
-ttest hh_size if offfarm !=. & year==2012, by(treat)
-ttest schll_hh if offfarm !=. & year==2012, by(treat)
-ttest asset if offfarm !=. & year==2012, by(treat)
-ttest farmsize if offfarm !=. & year==2012, by(treat)
-ttest bazaar if offfarm !=. & year==2012, by(treat)
-ttest road if offfarm !=. & year==2012, by(treat)
+ttest offfarm if year==2012, by(mobile)
+ttest povertyhead if  year==2012, by(mobile)
+ttest deppov190gcpi if  year==2012, by(mobile)
+ttest mpiscore if  year==2012, by(mobile)
+ttest ttinc if  year==2012, by(mobile)
+ttest pcti if  year==2012, by(mobile)
+
+ttest female if  year==2012, by(mobile)
+ttest age_hh if  year==2012, by(mobile)
+ttest hh_size if  year==2012, by(mobile)
+ttest schll_hh if  year==2012, by(mobile)
+ttest asset if  year==2012, by(mobile)
+ttest farmsize if  year==2012, by(mobile)
+ttest bazaar if  year==2012, by(mobile)
+ttest road if  year==2012, by(mobile)
 
 
-ttest offfarm if offfarm !=. & year==2015, by(treat)
-ttest povertyhead if offfarm !=. & year==2015, by(treat)
-ttest deppov320gcpi if offfarm !=. & year==2015, by(treat)
-ttest mpiscore if offfarm !=. & year==2015, by(treat)
-ttest ttinc if offfarm !=. & year==2015, by(treat)
-ttest pcti if offfarm !=. & year==2015, by(treat)
-ttest Male if offfarm !=. & year==2015, by(treat)
-ttest age_hh if offfarm !=. & year==2015, by(treat)
-ttest hh_size if offfarm !=. & year==2015, by(treat)
-ttest schll_hh if offfarm !=. & year==2015, by(treat)
-ttest asset if offfarm !=. & year==2015, by(treat)
-ttest farmsize if offfarm !=. & year==2015, by(treat)
-ttest bazaar if offfarm !=. & year==2015, by(treat)
-ttest road if offfarm !=. & year==2015, by(treat)
+ttest offfarm if  year==2015, by(mobile)
+ttest povertyhead if  year==2015, by(mobile)
+ttest deppov190gcpi if  year==2015, by(mobile)
+ttest mpiscore if  year==2015, by(mobile)
+ttest ttinc if  year==2015, by(mobile)
+ttest pcti if  year==2015, by(mobile)
+ttest female if  year==2015, by(mobile)
+ttest age_hh if  year==2015, by(mobile)
+ttest hh_size if  year==2015, by(mobile)
+ttest schll_hh if  year==2015, by(mobile)
+ttest asset if  year==2015, by(mobile)
+ttest farmsize if  year==2015, by(mobile)
+ttest bazaar if  year==2015, by(mobile)
+ttest road if  year==2015, by(mobile)
 
-ttest offfarm if offfarm !=. & year==2018, by(treat)
-ttest povertyhead if offfarm !=. & year==2018, by(treat)
-ttest deppov320gcpi if offfarm !=. & year==2018, by(treat)
-ttest mpiscore if offfarm !=. & year==2018, by(treat)
-ttest ttinc if offfarm !=. & year==2018, by(treat)
-ttest pcti if offfarm !=. & year==2018, by(treat)
-ttest Male if offfarm !=. & year==2018, by(treat)
-ttest age_hh if offfarm !=. & year==2018, by(treat)
-ttest hh_size if offfarm !=. & year==2018, by(treat)
-ttest schll_hh if offfarm !=. & year==2018, by(treat)
-ttest asset if offfarm !=. & year==2018, by(treat)
-ttest farmsize if offfarm !=. & year==2018, by(treat)
-ttest bazaar if offfarm !=. & year==2018, by(treat)
-ttest road if offfarm !=. & year==2018, by(treat)
+ttest offfarm if  year==2018, by(mobile)
+ttest povertyhead if  year==2018, by(mobile)
+ttest deppov190gcpi if  year==2018, by(mobile)
+ttest mpiscore if  year==2018, by(mobile)
+ttest ttinc if  year==2018, by(mobile)
+ttest pcti if  year==2018, by(mobile)
+ttest female if  year==2018, by(mobile)
+ttest age_hh if  year==2018, by(mobile)
+ttest hh_size if  year==2018, by(mobile)
+ttest schll_hh if  year==2018, by(mobile)
+ttest asset if  year==2018, by(mobile)
+ttest farmsize if  year==2018, by(mobile)
+ttest bazaar if  year==2018, by(mobile)
+ttest road if  year==2018, by(mobile)
 
-//povertyhead deppov320gcpi mpiscore ttinc pcti mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension 
+//povertyhead deppov190gcpi mpiscore ttinc pcti mobile_village hs hr ha hw s r a w hst hrt hat hwt ts tr ta tw Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension 
 *mobile phone ownership overtime
 graph bar mobile, over(year) ytitle("Mobile phone ownership") title("mobile phone ownership from 2011 to 2019") note("Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19") scheme(s1mono)
 graph export $graph/phone_overtime.jpg, replace
@@ -197,13 +202,13 @@ graph export $figure\income_dist.png, replace
 *RE
 xtset a01 year
 eststo clear
-eststo: xtprobit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015, vce(robust)
+eststo: xtprobit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015, vce(robust)
 quietly estadd local MK No, replace
 quietly estadd local year Yes, replace
 
 **Mundlak Estimator CRE
 sort a01
-by a01: egen m1=mean(Male) 
+by a01: egen m1=mean(female) 
 by a01: egen m2=mean(age_hh )
 by a01: egen m3=mean(hh_size)
 by a01: egen m4=mean(schll_hh)
@@ -213,63 +218,54 @@ by a01: egen m7=mean(bazaar)
 by a01: egen m8=mean(irrigation)
 by a01: egen m9=mean(extension)
 
-eststo: xtprobit mobile mobile_villag srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 m1 m2 m3 m4 m5 m6 m7 m8 m9, vce(robust) 
+eststo: xtprobit mobile mobile_villag srshock rrshock arshock wrshock  stshock rtshock atshock wtshock femal age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 m1 m2 m3 m4 m5 m6 m7 m9, vce(robust) 
 predict xb
 gen residualm=mobile-xb
 drop xb 
 quietly estadd local MK Yes, replace
 quietly estadd local year Yes, replace
 
-esttab  using $table\1ststage.rtf, b(%4.3f) se replace label wide nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Estimated by random effect probit model) keep(mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension) s(MK year N, label("Covariate mean values" "Year dummy" "Observations")) mtitles("RE probit" "MK probit") star(* 0.10 ** 0.05 *** 0.01)
+esttab  using $table\1ststage.rtf, b(%4.3f) se replace label wide nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. Estimated by random effect probit model) keep(mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension) s(MK year N, label("Covariate mean values" "Year dummy" "Observations")) mtitles("RE probit" "MK probit") star(* 0.10 ** 0.05 *** 0.01)
 
 
 **second stage the impact of mobile phone on off-farm employment, poverty, and income
 eststo clear
-eststo: xtprobit offfarm mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
-margins, dydx(mobile)
+xtprobit offfarm mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile residualm)
 quietly estadd local FE No, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe offfarm mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, absorb(a01) vce(robust)
-quietly estadd local FE Yes, replace
-quietly estadd local year Yes, replace
-quietly estadd local control Yes, replace
-
-eststo: xtprobit povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, vce(robust)
-margins, dydx(mobile)
+xtprobit povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile residualm)
 quietly estadd local FE No, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
  
-eststo: reghdfe povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm, absorb(a01) vce(robust)
+
+xttobit deppov190gcpi mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, ll(0) 
+eststo: margins, dydx(mobile residualm)
 quietly estadd local FE Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: xttobit deppov320gcpi mobile srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm bazaar road irrigation extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m8 m9, ll(0) 
-margins, dydx(mobile)
+eststo: reghdfe mpiscore mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road extension bazaar year2012 year2015 residualm, absorb(a01) vce(r)
 quietly estadd local FE Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe mpiscore mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
+eststo: reghdfe ln_ttlinc mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
 quietly estadd local FE Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe ln_ttlinc mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
-quietly estadd local FE Yes, replace
-quietly estadd local year Yes, replace
-quietly estadd local control Yes, replace
-
-eststo: reghdfe ln_pctinc mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
+eststo: reghdfe ln_pctinc mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
 quietly estadd local FE Yes, replace
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
 label var residualm "Residual-mobile"
-esttab  using $table\2ndstage.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1) and (3): Estimated by RE probit model. (2) and (4): Estimated by FE LPM, (5), (6), (7) and (8): Estimated by OLS FE.) keep(mobile residualm) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Off-farm employment " "Poverty Headcount " "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
+esttab  using $table\2ndstage.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19.) keep(mobile residualm) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
 
 esttab  using $table\2ndstage_full.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1) and (3): Estimated by RE probit model. (2) and (4): Estimated by FE LPM, (5), (6), (7) and (8): Estimated by OLS FE.) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Off-farm employment " "Poverty Headcount " "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
 
@@ -282,7 +278,7 @@ reghdfe povertyhead mobile srshock rrshock arshock wrshock  stshock rtshock atsh
 estimates store B
 
 
-reghdfe deppov320gcpi mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
+reghdfe deppov190gcpi mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 residualm, absorb(a01) vce(r)
 estimates store C
 
 
@@ -307,50 +303,157 @@ drop residualm
 **Validity of IV
 eststo clear
 xtset a01 year
-eststo: probit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015, vce(robust)
+eststo: probit mobile mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015, vce(robust)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: probit offfarm mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0, vce(r)
+eststo: probit offfarm mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 if mobile==0, vce(r)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: probit p320hcgcpi mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0, vce(robust)
+eststo: probit povertyhead mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension  year2012 year2015 if mobile==0, vce(robust)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe deppov320gcpi mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0, vce(robust)
+eststo: reghdfe deppov190gcpi mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 if mobile==0, vce(robust)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe mpiscore mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0,vce(r)
+eststo: reghdfe mpiscore mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 if mobile==0,vce(r)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe ln_ttlinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0, vce(r)
+eststo: reghdfe ln_ttlinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 if mobile==0, vce(r)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
 
-eststo: reghdfe ln_pctinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015 if mobile==0, vce(robust)
+eststo: reghdfe ln_pctinc mobile_village srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 if mobile==0, vce(robust)
 quietly estadd local year Yes, replace
 quietly estadd local control Yes, replace
+
+ivreghdfe ln_pctinc srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 (mobile=mobile_village), a(a01) vce(robust)
 
 esttab  using $table\falsification_iv.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19. (1), (2), and (3): Estimated by probit model. (4), (5), and (6): Estimated by OLS.) keep(mobile_village) s(year control N, label("Year dummy" "Control variables" "Observations")) mtitles("Mobile phone ownership (1/0)" "Off-farm employment (1/0)" "Headcount poverty (1/0)" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
+
+*heterogeneous analysis
+** gender
+
+gen fmlmbl=female*mobile
+gen fmlvllg=mobile_village*female
+
+reghdfe fmlmbl fmlvllg srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015, a(a01)vce(robust) 
+predict xb
+gen residualfmlmbl=fmlmbl-xb
+drop xb 
+
+eststo clear
+xtprobit offfarm mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm  m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile fmlmbl)
+quietly estadd local FE No, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+xtprobit povertyhead mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile fmlmbl)
+quietly estadd local FE No, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+ 
+
+xttobit deppov190gcpi mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, ll(0) 
+eststo: margins, dydx(mobile fmlmbl)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe mpiscore mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road extension bazaar year2012 year2015 residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe ln_ttlinc mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe ln_pctinc mobile fmlmbl residualfmlmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+label var residualm "Residual-mobile"
+esttab  using $table\heterogender.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19.) keep(mobile residualm) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
+
+** farm size
+gen frmmbl=farmsize*mobile
+gen frmvllg=mobile_village*farmsize
+
+reghdfe frmmbl frmvllg srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015, a(a01)vce(robust) 
+predict xb
+gen residualfrmmbl=frmmbl-xb
+drop xb 
+
+eststo clear
+xtprobit offfarm mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm  m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile frmmbl)
+quietly estadd local FE No, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+xtprobit povertyhead mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock  female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015 residualm m1 m2 m3 m4 m5 m6 m7 m9, vce(robust)
+eststo: margins, dydx(mobile frmmbl)
+quietly estadd local FE No, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+ 
+
+xttobit deppov190gcpi mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock  stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm bazaar road extension year2012 year2015  residualm m1 m2 m3 m4 m5 m6 m7 m9, ll(0) 
+eststo: margins, dydx(mobile frmmbl)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe mpiscore mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road extension bazaar year2012 year2015  residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe ln_ttlinc mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace
+
+eststo: reghdfe ln_pctinc mobile frmmbl residualfrmmbl srshock rrshock arshock wrshock stshock rtshock atshock wtshock female age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 residualm, absorb(a01) vce(r)
+quietly estadd local FE Yes, replace
+quietly estadd local year Yes, replace
+quietly estadd local control Yes, replace 
+
+esttab  using $table\heterofarm.rtf, b(%4.3f) se replace label nodepvar nogaps addnote(Source: Bangladesh Integrated Household Survey 2011/12, 2015, 2018/19.) keep(mobile frmmbl) s(FE year control N, label("Individual FE" "Year dummy" "Control variables" "Observations")) mtitles( "Off-farm employment" "Poverty Headcount" "Depth of poverty" "MPI score" "Total household income (log)" "Per capita total income (log)")star(* 0.10 ** 0.05 *** 0.01)
 
 *Robustness check
 *PSM DID
 use panel, clear
-psmatch2 mobile srshock rrshock arshock wrshock stshock rtshock atshock wtshock  Male age_hh hh_size schll_hh asset lnfrm road bazaar irrigation extension year2012 year2015, out(povertyhead) logit n(1) com caliper(0.05) ate
+sort a01
+by a01: egen m1=mean(Male) 
+by a01: egen m2=mean(age_hh )
+by a01: egen m3=mean(hh_size)
+by a01: egen m4=mean(schll_hh)
+by a01: egen m5=mean(asset)
+by a01: egen m6=mean(road)
+by a01: egen m7=mean(bazaar)
+by a01: egen m8=mean(irrigation)
+by a01: egen m9=mean(extension)
+
+psmatch2 mobile mobile_village srshock rrshock arshock wrshock stshock rtshock atshock wtshock Male age_hh hh_size schll_hh asset lnfrm road bazaar extension year2012 year2015 m1 m2 m3 m4 m5 m6 m7 m9, out(offfarm) norepl n(1) com caliper(0.05) 
 
 bysort a01: egen matched=sum(_support)
-drop if year2012==1 & mobile==1
+
+twoway (kdensity _pscore if mobile==1, color(emerald))(kdensity _pscore if mobile==0), ytitle(Density) xtitle(Propensity score) legend(label(1 "Ownership") label(2 "Non-ownership")) saving(pre) scheme(s1mono) 
+
+twoway (kdensity _pscore if mobile==1 & _support==1, color(emerald))(kdensity _pscore if mobile==0 & _support==1), ytitle(Density) xtitle(Propensity score) legend(label(1 "Ownership") label(2 "Non-ownership")) saving(post) scheme(s1mono) 
 
 
-label var year2015 "After"
-label var treat "Treated"
-
-
-pstest _pscore, density both title(Common support assumption for the propensity score) 
+graph combine pre.gph post.gph
 graph export $graph/psm_density.jpg, replace
 
 
