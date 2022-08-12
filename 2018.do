@@ -566,5 +566,18 @@ label var farmsize "Farm Size(decimal)"
 label var ln_farm "Farm size(log)"
 //gen lnoff=log(offrmagr)
 gen year=2018
+gen diff=a01-int(a01)
+gen a01_int=a01-diff
+tab diff
+gen ext=0 if diff==0
+replace ext=1 if diff>0 & diff<=.11
+replace ext=2 if diff>.11
+drop if ext>1
+ren a01 a01R2
+ren a01_int a01
+order a01
+drop ext diff
+duplicates report a01
+drop if dvcode==.
 save 2018.dta, replace
 

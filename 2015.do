@@ -39,6 +39,16 @@ merge 1:1 a01 using $BIHS15\mpi_R2, nogen //multidimentional poverty index
 keep a01 pcexp_da p190hcgcpi p190hcfcpi p320hcgcpi p320hcfcpi pov190gapgcpi deppov190gcpi pov190gapfcpi deppov190fcpi pov320gapgcpi pov320gapfcpi deppov320fcpi deppov320gcpi hc_mpi mpiscore
 save poverty15.dta, replace
 
+**social network
+use $BIHS15\024_r2_mod_h9_male.dta, clear
+recode h9_02_1 (1=1 "Yes")(2=0 "No")(.=0 "No"),gen(network_urea)
+keep a01 network_urea
+merge 1:1 a01 using $BIHS15\077_r2_mod_y8_female, nogene
+recode y8_06 (1=1 "Yes")(2=0 "No")(.=0 "No"),gen(network_health)
+gen network_discussion=network_health+network_urea
+recode network_discussion (0=0 "No")(nonm=1 "Yes"), gen(network)
+keep a01 network
+save network15.dta, replace
 
 ** keep age gender education occupation of HH
 use $BIHS15\003_r2_male_mod_b1.dta, clear
@@ -562,6 +572,24 @@ merge 1:1 a01 using asset15, nogen
 label var farmsize "Farm Size(decimal)"
 label var ln_farm "Farm size(log)"
 gen year=2015
+
+gen diff=a01-int(a01)
+gen a01_int=a01-diff
+tab diff
+gen ext=0 if diff==0
+replace ext=1 if diff>0 & diff<.18
+replace ext=2 if diff>.18 & diff<.21
+replace ext=3 if diff>.21 & diff<.31
+replace ext=4 if diff>.31 & diff<.41
+drop if ext>1
+
+ren a01 a01R2
+ren a01_int a01
+order a01
+sort a01
+duplicates report a01
+sum a01
+drop if dvcode==.
 save 2015.dta, replace
 
 //gen lnoff=log(offrmagr)
